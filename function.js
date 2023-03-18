@@ -6,18 +6,17 @@ const iconv = require('iconv-lite');
 var numArticle = null;
 const articleAll = [];
 
-
-
 const getAllAuthorURL = async (selector, url) => {
   const html = await sendRequestGetDetail(url);
   const allURL = await getURL(html, selector);
-
   return allURL;
 };
+
 
 const getArticleAll = async () => {
   return articleAll;
 };
+
 
 const getURL = async (html, selector) => {
   const $ = cheerio.load(html);
@@ -33,6 +32,7 @@ const getURL = async (html, selector) => {
   });
   return news_data;
 };
+
 
 const getAuthorDetail = async (html,num) => {
   const $ = cheerio.load(html);
@@ -54,42 +54,34 @@ const getAuthorDetail = async (html,num) => {
   return news_data;
 }
 
-var author = null;
-const getArticleOfAuthor = async (selector, URL,num) => {
+
+const getArticleOfAuthor = async (selector, URL,author_id) => {
   const html = await sendRequestGetDetail(URL);
   const content = await getArrayObjectData(html, selector);
-  
   const new_data = [];
 
-  const  article_detail = [];
   console.log("Number of Articles : ", content.length);
   console.log("Article");
+
   //content.length
   for (let i = 0; i < 3; i++) {
-    console.log(i + 1);
 
+    console.log(i + 1);
     const e = content[i];
     const detail_page_url = e.url;
     await new Promise((resolve) => setTimeout(resolve, 100));
     const detail_page_html = await sendRequestGetDetail(detail_page_url);
     numArticle += 1
-    const data = await getDetail(detail_page_html,detail_page_url);
+    const data = await getDetail(detail_page_html,detail_page_url,author_id);
     articleAll.push(data)
-    new_data.push(numArticle);
-    article_detail.push(data)
+    new_data.push(data);
+
   }
+   const all = await getAuthorDetail(html,author_id);
+   all.article = new_data
+   const author = await getAuthorDetail(html,author_id);
+  return {all:all , author:author}
 
-  // author = await getAuthorDetail(html,num);
-  // const authorDetail = await author;
-  // const all =  await author  ;
-   const authorDetail = await getAuthorDetail(html,num);
-   authorDetail.article = new_data;
-
-   const all = await getAuthorDetail(html,num);
-   all.article = article_detail
-   authorDetail.article = new_data;
-   all.article = article_detail
-  return {authorDetail : authorDetail, all : all}
 };
 
 const getArrayObjectData = async (html, selector) => {
@@ -107,8 +99,7 @@ const getArrayObjectData = async (html, selector) => {
 };
 
 
-
-const getDetail = async (html,url) => {
+const getDetail = async (html,url,author_id) => {
   const $ = cheerio.load(html);
   const data = check_field($)
   const news_data = {
@@ -117,18 +108,18 @@ const getDetail = async (html,url) => {
     author: $("#gsc_oci_table > div:nth-child(1) > div.gsc_oci_value").text(),
     releaseDate: $("#gsc_oci_table > div:nth-child(2) > div.gsc_oci_value").text(),
     academicJournal: $("#gsc_oci_table > div:nth-child(3) > div.gsc_oci_value").text(),
-
     volume: data.volume,
     no: data.no,
     page: data.page,
     publisher: data.publisher,
     description: ($("#gsc_oci_descr > div").text().trim()),
-    url : url
-
+    url : url,
+    author_id : author_id
   };
   
   return news_data;
 };
+
 
 const sendRequestGetDetail = async (URL) => {
   // const response = await axios.get({URL});
@@ -141,6 +132,7 @@ const sendRequestGetDetail = async (URL) => {
   const html = iconv.decode(response.data, 'utf-8');
   return html;
 };
+
 
 module.exports = {
   getArticleOfAuthor,

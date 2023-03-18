@@ -1,5 +1,5 @@
 const express = require("express");
-const { getArticleOfAuthor,getAllAuthorURL,sendRequestGetDetail,getAuthorDetail,getDetail,getArticleAll} = require("./function");
+const { getArticleOfAuthor,getAllAuthorURL,getArticleAll} = require("./function");
 
 
 
@@ -43,26 +43,22 @@ app.get("/scraper", async (req, res) => {
   const authorURL = await getAllAuthorURL(selectorForURL, startURL);
   
   const selector = "#gsc_a_b > tr";
-  const dataAriticle = [];
+  const author = [];
   const all = [];
-  //authorURL.length
+
   for (let i = 0; i < authorURL.length; i++) {
-    // dataAriticle.id = i+1
     console.log("Author ",i+1," : "+ authorURL[i].name)
     const num = i+1;
     const data = await getArticleOfAuthor(selector, authorURL[i].url, num);
-    dataAriticle.push(data.authorDetail);
+    author.push(data.author);
     all.push(data.all)
   }
   console.log("Finish")
-  // const articleAll = await getArticleAll()
+  
   Ariticle = await getArticleAll()
-  Author = dataAriticle
+  Author = author
   All  = all
   res.status(200).json({
-    // url: authorURL,
-    // Author: dataAriticle,
-    // Ariticle: Ariticle
     data : all
   });
 });
@@ -71,7 +67,6 @@ app.get("/test", async (req, res) => {
 
   const selector = "#gsc_a_b > tr";
   const dataAriticle = [];
-  //authorURL.length
   console.log("Author 1 : Thimaporn Phetkaew")
   // const url = "https://scholar.google.com/citations?hl=th&user=5OhyuzYAAAAJ";
   const url = "https://scholar.google.com/citations?hl=th&user=YiPGPisAAAAJ";
